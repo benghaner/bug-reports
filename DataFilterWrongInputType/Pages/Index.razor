@@ -1,0 +1,80 @@
+﻿@page "/"
+
+<div class="col-3 mb-3">
+    <RadzenText TextStyle="TextStyle.Subtitle2">Collection</RadzenText>
+    <RadzenDropDown Data="@_collections"
+                    @bind-Value="_collection"
+                    Change="@(() => _dataFilter.ClearFilters())"
+                    TextProperty="Name"
+                    Placeholder="Select..."
+                    class="w-100" />
+</div>
+
+@if (_collection is not null)
+{
+    <RadzenDataFilter @ref="_dataFilter"
+                  TItem="ReportField"
+                  class="mb-3">
+        <Properties>
+            @foreach (var field in _collection.Fields.OrderBy(x => x.Name))
+            {
+                <RadzenDataFilterProperty TItem="ReportField"
+                                  Type="@field.Type"
+                                  Property="@field.Name"
+                                  Title="@field.Name" />
+            }
+        </Properties>
+    </RadzenDataFilter>
+}
+
+@code {
+    private RadzenDataFilter<ReportField> _dataFilter;
+
+    private List<Collection> _collections = new();
+    private Collection _collection = default!;
+
+    protected override void OnInitialized()
+    {
+        var fields1 = new List<ReportField>
+        {
+            new ReportField("String Field", typeof(string)),
+            new ReportField("DateTime Field", typeof(DateTime))
+        };
+
+        var fields2 = new List<ReportField>
+        {
+            new ReportField("DateTime Field", typeof(DateTime)),
+            new ReportField("Boolean Field", typeof(bool))
+        };
+
+        _collections = new List<Collection>
+        {
+            new Collection("Collection 1", fields1),
+            new Collection("Collection 2", fields2)
+        };
+    }
+
+    public sealed class Collection
+    {
+        public string Name { get; set; }
+        public List<ReportField> Fields { get; set; } = new();
+
+        public Collection(string name, List<ReportField> fields)
+        {
+            Name = name;
+            Fields = fields;
+        }
+    }
+
+    public sealed class ReportField
+    {
+        public string Name { get; set; }
+        public Type Type { get; set; }
+
+        public ReportField(string name, Type type)
+        {
+            Name = name;
+            Type = type;
+        }
+    }
+}
